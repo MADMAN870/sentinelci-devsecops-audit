@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "",
+
+  "meta": {
+    "report_title": "",
+    "client_name": "",
+    "project_name": "",
+    "prepared_by": "",
+    "report_date": "",
+    "report_version": "",
+    "report_status": "",
+    "classification": "",
+    "assessment_start": "",
+    "assessment_end": "",
+    "target_application": "",
+    "target_environment": "",
+    "testing_type": "",
+    "overall_risk": "",
+    "overall_risk_rationale": ""
+  },
+
+  "pipeline": {
+    "gitlab_project": "",
+    "pipeline_id": "",
+    "pipeline_url": "",
+    "repository_url": "",
+    "branch": "",
+    "commit_sha": "",
+    "execution_date": "",
+    "status": "",
+    "runner": "",
+    "image_reference": ""
+  },
+
+  "scope": {
+    "out_of_scope": [],
+    "rules_of_engagement": "",
+    "methodology": "",
+    "limitations": "",
+    "assumptions_and_limitations": "",
+    "tools_description": ""
+  },
+
+  "summary": {
+    "severity_counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "informational": 0,
+      "total": 0
+    },
+    "counts_by_category": {},
+    "counts_by_tool": {},
+    "main_security_issues": "",
+    "pipeline_security_assessment": "",
+    "pipeline_controls_assessment": "",
+    "suggested_overall_risk": "",
+    "suggested_risk_rationale": "",
+    "scan_window_start": "",
+    "scan_window_end": "",
+    "detected_target": "",
+    "detected_image_reference": ""
+  },
+
+  "tools": {
+    "zap": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "gitleaks": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "semgrep": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "syft": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "trivy": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "grype": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    },
+    "cosign": {
+      "display_name": "", "purpose": "", "status": "", "version": "", "configuration": "",
+      "target": "", "source_files": [], "finding_count": 0,
+      "severity_counts": {"critical": 0, "high": 0, "medium": 0, "low": 0, "informational": 0, "total": 0},
+      "notes": ""
+    }
+  },
+
+  "sbom": {
+    "format": "",
+    "spec_version": "",
+    "generator": "",
+    "component_count": 0,
+    "components_by_type": {},
+    "source_files": []
+  },
+
+  "signing": {
+    "signed": null,
+    "verified": null,
+    "image": "",
+    "digest": "",
+    "identity": "",
+    "issuer": "",
+    "details": "",
+    "source_files": []
+  },
+
+  "findings": [],
+
+  "finding_schema": {
+    "id": "",
+    "fingerprint": "",
+    "title": "",
+    "category": "",
+    "severity": "",
+    "rule_id": "",
+    "cvss_version": "",
+    "cvss_score": null,
+    "cvss_vector": "",
+    "affected_asset": "",
+    "source_tools": [],
+    "status": "",
+    "references": [],
+    "description": "",
+    "scanner_context": "",
+    "detection_activity": "",
+    "root_cause": "",
+    "evidence_description": "",
+    "evidence_source": "",
+    "evidence": "",
+    "instance_count": 0,
+    "remediation": [],
+    "impact": "",
+    "exploitability": "",
+    "retest_status": "",
+    "retest_date": "",
+    "retest_method": "",
+    "retest_result": ""
+  },
+
+  "remediation_plan": [
+    {"priority": "Immediate",   "action": "", "suggested_action": "", "owner": "", "target_date": ""},
+    {"priority": "Short term",  "action": "", "suggested_action": "", "owner": "", "target_date": ""},
+    {"priority": "Medium term", "action": "", "suggested_action": "", "owner": "", "target_date": ""},
+    {"priority": "Long term",   "action": "", "suggested_action": "", "owner": "", "target_date": ""}
+  ],
+
+  "additional": {
+    "risk_acceptance_details": "",
+    "additional_recommendations": "",
+    "retesting_plan": ""
+  },
+
+  "appendix": {
+    "pipeline_evidence": "",
+    "scanner_reports": []
+  },
+
+  "normalizer": {
+    "reports_dir": "",
+    "unrecognized_files": [],
+    "errors": []
+  }
+}

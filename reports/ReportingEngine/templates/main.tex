@@ -1,0 +1,647 @@
+% main.tex
+% Minimal, monochrome penetration-testing report template
+% Compile: pdflatex main.tex (run twice for the table of contents)
+% Optional: latexmk -pdf main.tex
+%
+% Dynamic content can later be populated by Python/Jinja2.
+% Keep report data separate from this presentation template.
+
+\documentclass[11pt,a4paper]{report}
+
+% ---------------------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=25mm,headheight=15pt]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{datetime2}
+
+% ---------------------------------------------------------------------------
+% Neutral style variables
+% These are intentionally centralized so they can be overridden later.
+% No blue/teal colors are used.
+% ---------------------------------------------------------------------------
+\definecolor{ReportBlack}{HTML}{000000}
+\definecolor{ReportDarkGray}{HTML}{333333}
+\definecolor{ReportMidGray}{HTML}{666666}
+\definecolor{ReportLightGray}{HTML}{EEEEEE}
+\definecolor{ReportRuleGray}{HTML}{BBBBBB}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=ReportBlack,
+    urlcolor=ReportBlack,
+    citecolor=ReportBlack,
+    pdfborder={0 0 0}
+}
+
+% ---------------------------------------------------------------------------
+% Report metadata / replaceable values
+% ---------------------------------------------------------------------------
+\newcommand{\ReportTitle}{Penetration Testing Report}
+\newcommand{\ClientName}{[CLIENT / ORGANIZATION]}
+\newcommand{\ProjectName}{[PROJECT NAME]}
+\newcommand{\PreparedBy}{[AUTHOR / SECURITY TEAM]}
+\newcommand{\ReportDate}{[REPORT DATE]}
+\newcommand{\AssessmentStart}{[START DATE]}
+\newcommand{\AssessmentEnd}{[END DATE]}
+\newcommand{\TargetEnvironment}{[TARGET ENVIRONMENT]}
+\newcommand{\TargetApplication}{VAmPI -- Vulnerable API}
+\newcommand{\ReportVersion}{1.0}
+\newcommand{\Classification}{CONFIDENTIAL}
+\newcommand{\OverallRisk}{[OVERALL RISK]}
+\newcommand{\TestingType}{[BLACK BOX / GREY BOX / WHITE BOX]}
+\newcommand{\CommitSHA}{[GIT COMMIT SHA]}
+\newcommand{\PipelineID}{[GITLAB PIPELINE ID]}
+\newcommand{\PipelineURL}{[GITLAB PIPELINE URL]}
+\newcommand{\RepositoryURL}{[REPOSITORY URL]}
+\newcommand{\BranchName}{[BRANCH]}
+\newcommand{\ReportStatus}{[DRAFT / FINAL]}
+
+% Severity totals: populate from normalized scanner/test data.
+\newcommand{\CriticalCount}{[N]}
+\newcommand{\HighCount}{[N]}
+\newcommand{\MediumCount}{[N]}
+\newcommand{\LowCount}{[N]}
+\newcommand{\InfoCount}{[N]}
+\newcommand{\TotalFindings}{[N]}
+
+% ---------------------------------------------------------------------------
+% Formatting
+% ---------------------------------------------------------------------------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.2}
+\setlist[itemize]{leftmargin=*,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=*,itemsep=2pt,topsep=3pt}
+
+\titleformat{\chapter}
+  {\normalfont\huge\bfseries\color{ReportBlack}}
+  {\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{-10pt}{18pt}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{ReportBlack}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{16pt}{7pt}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{ReportDarkGray}}
+  {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{12pt}{5pt}
+
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    textfont=normalfont
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\ReportTitle}
+\fancyhead[R]{\small\ProjectName}
+\fancyfoot[L]{\small\Classification}
+\fancyfoot[R]{\small Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\placeholder}[1]{\textbf{[#1]}}
+\newcommand{\findingfield}[2]{\textbf{#1}\\#2\par}
+\newcommand{\severity}[1]{\textbf{#1}}
+
+% Listing style for small evidence/configuration excerpts.
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    columns=fullflexible,
+    frame=single,
+    rulecolor=\color{ReportRuleGray},
+    backgroundcolor=\color{white},
+    numbers=left,
+    numberstyle=\tiny\color{ReportMidGray},
+    showstringspaces=false,
+    tabsize=2
+}
+
+% ---------------------------------------------------------------------------
+% Document
+% ---------------------------------------------------------------------------
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% Cover page
+% ---------------------------------------------------------------------------
+\begin{titlepage}
+    \thispagestyle{empty}
+    \vspace*{18mm}
+
+    {\Large\bfseries \ReportTitle\par}
+    \vspace{4mm}
+    {\large \ProjectName\par}
+
+    \vspace{18mm}
+    \hrule height 0.8pt
+    \vspace{10mm}
+
+    \begin{tabularx}{\textwidth}{@{}>{\bfseries}p{43mm}Y@{}}
+        Prepared for: & \ClientName \\
+        Prepared by: & \PreparedBy \\
+        Application: & \TargetApplication \\
+        Environment: & \TargetEnvironment \\
+        Assessment type: & \TestingType \\
+        Assessment dates: & \AssessmentStart\ -- \AssessmentEnd \\
+        Report date: & \ReportDate \\
+        Report version: & \ReportVersion \\
+        Status: & \ReportStatus \\
+    \end{tabularx}
+
+    \vfill
+    \hrule height 0.4pt
+    \vspace{4mm}
+    {\small\bfseries \Classification\par}
+    {\small This document contains security assessment information intended
+    only for the authorized recipient. Do not distribute without permission.\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+% ---------------------------------------------------------------------------
+% Document control
+% ---------------------------------------------------------------------------
+\chapter*{Document Control}
+\addcontentsline{toc}{chapter}{Document Control}
+
+\begin{tabularx}{\textwidth}{@{}p{43mm}Y@{}}
+    \toprule
+    \textbf{Field} & \textbf{Value} \\
+    \midrule
+    Document title & \ReportTitle \\
+    Project & \ProjectName \\
+    Client & \ClientName \\
+    Version & \ReportVersion \\
+    Report status & \ReportStatus \\
+    Classification & \Classification \\
+    Author & \PreparedBy \\
+    Report date & \ReportDate \\
+    \bottomrule
+\end{tabularx}
+
+\vspace{8mm}
+\textbf{Revision history}
+
+\begin{tabularx}{\textwidth}{@{}p{20mm}p{32mm}p{35mm}Y@{}}
+    \toprule
+    \textbf{Version} & \textbf{Date} & \textbf{Author} & \textbf{Description} \\
+    \midrule
+    1.0 & \ReportDate & \PreparedBy & Initial report \\
+    \placeholder{VERSION} & \placeholder{DATE} & \placeholder{AUTHOR} &
+    \placeholder{CHANGE DESCRIPTION} \\
+    \bottomrule
+\end{tabularx}
+
+\tableofcontents
+\listoftables
+\listoffigures
+\clearpage
+
+\pagenumbering{arabic}
+
+% ---------------------------------------------------------------------------
+% 1. Executive Summary
+% ---------------------------------------------------------------------------
+\chapter{Executive Summary}
+
+\section{Assessment Overview}
+This report documents the results of a security assessment of
+\TargetApplication, conducted for \ClientName. The assessment focused on the
+application and its supporting CI/CD security controls in the
+\TargetEnvironment\ environment.
+
+The assessment was performed from \AssessmentStart\ to \AssessmentEnd.
+The testing approach was \TestingType.
+
+\section{Objectives}
+The objectives were to:
+\begin{itemize}
+    \item Assess the security posture of the deliberately vulnerable VAmPI API.
+    \item Evaluate security checks integrated into the GitLab CI/CD pipeline.
+    \item Identify exposed secrets, application security weaknesses, vulnerable
+          dependencies and container image risks.
+    \item Review software bill of materials (SBOM) generation and vulnerability
+          analysis.
+    \item Review image signing and signature verification controls.
+    \item Provide actionable remediation recommendations.
+\end{itemize}
+
+\section{Overall Assessment}
+\textbf{Overall risk rating:} \OverallRisk
+
+\textbf{Summary:} \placeholder{WRITE A SHORT, EVIDENCE-BASED SUMMARY OF THE
+MOST IMPORTANT RESULTS, BUSINESS/TECHNICAL IMPACT, AND OVERALL PIPELINE POSTURE.}
+
+\section{Findings Summary}
+\begin{table}[H]
+\centering
+\caption{Findings by severity}
+\begin{tabularx}{0.85\textwidth}{@{}Y r@{}}
+    \toprule
+    \textbf{Severity} & \textbf{Count} \\
+    \midrule
+    Critical & \CriticalCount \\
+    High & \HighCount \\
+    Medium & \MediumCount \\
+    Low & \LowCount \\
+    Informational & \InfoCount \\
+    \midrule
+    \textbf{Total} & \textbf{\TotalFindings} \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+% ---------------------------------------------------------------------------
+% 2. Scope and Methodology
+% ---------------------------------------------------------------------------
+\chapter{Scope and Methodology}
+
+\section{Scope}
+\begin{tabularx}{\textwidth}{@{}p{43mm}Y@{}}
+    \toprule
+    \textbf{Item} & \textbf{Description} \\
+    \midrule
+    Target application & \TargetApplication \\
+    Target environment & \TargetEnvironment \\
+    Repository & \RepositoryURL \\
+    Branch & \BranchName \\
+    Commit & \CommitSHA \\
+    GitLab pipeline ID & \PipelineID \\
+    Pipeline URL & \PipelineURL \\
+    Assessment type & \TestingType \\
+    \bottomrule
+\end{tabularx}
+
+\section{In-Scope Components}
+\begin{itemize}
+    \item VAmPI application and exposed API endpoints.
+    \item Application source code included in the assessed repository.
+    \item GitLab CI/CD configuration and security pipeline stages.
+    \item Container image built by the assessed pipeline.
+    \item Dependency and package inventory represented by the generated SBOM.
+    \item Container image vulnerability scanning and signing/verification steps.
+\end{itemize}
+
+\section{Out-of-Scope Components}
+\begin{itemize}
+    \item \placeholder{LIST EXCLUDED HOSTS, SERVICES, NETWORKS OR COMPONENTS}
+    \item \placeholder{IDENTIFY ANY THIRD-PARTY SYSTEMS NOT AUTHORIZED FOR TESTING}
+\end{itemize}
+
+\section{Rules of Engagement and Limitations}
+\placeholder{DOCUMENT AUTHORIZATION, TESTING WINDOWS, RATE LIMITS,
+PROHIBITED ACTIONS, TEST ACCOUNTS, ENVIRONMENTAL LIMITATIONS AND ANY
+INTERRUPTIONS OR CONSTRAINTS.}
+
+\section{Methodology}
+Describe the methodology actually followed. Relevant references may include:
+\begin{itemize}
+    \item OWASP Web Security Testing Guide.
+    \item OWASP API Security Top 10.
+    \item Penetration Testing Execution Standard (PTES).
+    \item NIST SP 800-115, Technical Guide to Information Security Testing
+          and Assessment.
+\end{itemize}
+\textit{Only list a methodology or reference as applied when it was actually
+used during the assessment.}
+
+\section{Tools and Techniques}
+\begin{longtable}{@{}p{35mm}p{38mm}p{75mm}@{}}
+    \caption{Assessment tools}\\
+    \toprule
+    \textbf{Tool} & \textbf{Purpose} & \textbf{Version / Configuration} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Tool} & \textbf{Purpose} & \textbf{Version / Configuration} \\
+    \midrule
+    \endhead
+    Gitleaks & Secret detection & \placeholder{VERSION / CONFIGURATION} \\
+    Semgrep & Static application security testing & \placeholder{VERSION / RULESETS} \\
+    Syft & SBOM generation & \placeholder{VERSION / OUTPUT FORMAT} \\
+    Trivy & Container / dependency scanning & \placeholder{VERSION / CONFIGURATION} \\
+    Grype & SBOM vulnerability analysis & \placeholder{VERSION / CONFIGURATION} \\
+    Cosign & Image signing and verification & \placeholder{VERSION / VERIFICATION MODE} \\
+    \placeholder{OTHER TOOL} & \placeholder{PURPOSE} & \placeholder{VERSION} \\
+    \bottomrule
+\end{longtable}
+
+% ---------------------------------------------------------------------------
+% 3. CI/CD Security Architecture
+% ---------------------------------------------------------------------------
+\chapter{CI/CD Security Architecture}
+
+\section{Pipeline Overview}
+\placeholder{DESCRIBE THE PIPELINE FLOW, TRIGGERS, RUNNERS, REGISTRIES,
+ARTIFACT STORAGE AND DEPLOYMENT TARGET. INSERT AN ARCHITECTURE DIAGRAM
+IF AVAILABLE.}
+
+% Example:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{evidence/pipeline-architecture.png}
+%   \caption{CI/CD security pipeline architecture}
+% \end{figure}
+
+\section{Security Controls by Pipeline Stage}
+\begin{longtable}{@{}p{29mm}p{37mm}p{79mm}@{}}
+    \caption{Pipeline security control mapping}\\
+    \toprule
+    \textbf{Stage} & \textbf{Control} & \textbf{Expected Evidence / Result} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Stage} & \textbf{Control} & \textbf{Expected Evidence / Result} \\
+    \midrule
+    \endhead
+    Source validation & Gitleaks & Secret scan report and detected-secret review \\
+    SAST & Semgrep & Static analysis findings and rule identifiers \\
+    SBOM generation & Syft & CycloneDX or SPDX inventory artifact \\
+    Image scanning & Trivy & Image/package vulnerability report \\
+    SBOM analysis & Grype & Vulnerability matches against SBOM components \\
+    Image signing & Cosign & Signature and signing identity evidence \\
+    Verification & Cosign & Verification result and policy outcome \\
+    \bottomrule
+\end{longtable}
+
+\section{Pipeline Execution Details}
+\begin{tabularx}{\textwidth}{@{}p{43mm}Y@{}}
+    \toprule
+    \textbf{Field} & \textbf{Value} \\
+    \midrule
+    GitLab project & \placeholder{PROJECT PATH} \\
+    Pipeline ID & \PipelineID \\
+    Pipeline URL & \PipelineURL \\
+    Branch / tag & \BranchName \\
+    Commit SHA & \CommitSHA \\
+    Execution date & \placeholder{DATE AND TIME WITH TIME ZONE} \\
+    Pipeline result & \placeholder{PASSED / FAILED / PARTIAL} \\
+    Runner / executor & \placeholder{RUNNER DETAILS} \\
+    Image reference & \placeholder{IMAGE NAME AND TAG / DIGEST} \\
+    \bottomrule
+\end{tabularx}
+
+% ---------------------------------------------------------------------------
+% 4. Findings Summary
+% ---------------------------------------------------------------------------
+\chapter{Findings Summary}
+
+The following table summarizes the security findings identified and validated
+during the assessment. Findings should be assigned a status that reflects their
+actual validation state.
+
+\begin{longtable}{@{}p{16mm}p{65mm}p{25mm}p{27mm}p{25mm}@{}}
+    \caption{Summary of security findings}\\
+    \toprule
+    \textbf{ID} & \textbf{Finding} & \textbf{Severity} &
+    \textbf{Status} & \textbf{Source} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{ID} & \textbf{Finding} & \textbf{Severity} &
+    \textbf{Status} & \textbf{Source} \\
+    \midrule
+    \endhead
+    F-001 & \placeholder{FINDING TITLE} & \placeholder{SEVERITY} &
+    \placeholder{STATUS} & \placeholder{TOOL / TEST} \\
+    F-002 & \placeholder{FINDING TITLE} & \placeholder{SEVERITY} &
+    \placeholder{STATUS} & \placeholder{TOOL / TEST} \\
+    \placeholder{F-ID} & \placeholder{FINDING TITLE} &
+    \placeholder{SEVERITY} & \placeholder{STATUS} &
+    \placeholder{TOOL / TEST} \\
+    \bottomrule
+\end{longtable}
+
+\textbf{Status definitions:}
+\begin{itemize}
+    \item \textbf{Detected:} Reported by a tool or test and awaiting validation.
+    \item \textbf{Validated:} Reviewed and confirmed as a security issue.
+    \item \textbf{False Positive:} Reviewed and determined not to represent a
+          valid issue in the assessed context.
+    \item \textbf{Accepted Risk:} Formally accepted by the authorized risk owner.
+    \item \textbf{Remediated:} Fix implemented and verified through retesting.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+% 5. Detailed Findings
+% ---------------------------------------------------------------------------
+\chapter{Detailed Findings}
+
+% Duplicate the following section for each finding.
+\section{F-001 -- \placeholder{FINDING TITLE}}
+
+\begin{tabularx}{\textwidth}{@{}p{43mm}Y@{}}
+    \toprule
+    \textbf{Attribute} & \textbf{Value} \\
+    \midrule
+    Finding ID & F-001 \\
+    Title & \placeholder{FINDING TITLE} \\
+    Category & \placeholder{SECRETS / SAST / DEPENDENCY / CONTAINER / API / SUPPLY CHAIN} \\
+    Severity & \placeholder{CRITICAL / HIGH / MEDIUM / LOW / INFORMATIONAL} \\
+    CVSS version & \placeholder{CVSS 3.1 OR 4.0, IF APPLICABLE} \\
+    CVSS score & \placeholder{SCORE} \\
+    CVSS vector & \placeholder{VECTOR STRING} \\
+    Affected asset & \placeholder{FILE / ENDPOINT / PACKAGE / IMAGE / PIPELINE JOB} \\
+    Source tool / test & \placeholder{TOOL OR MANUAL TEST} \\
+    Status & \placeholder{DETECTED / VALIDATED / FALSE POSITIVE / ACCEPTED RISK / REMEDIATED} \\
+    References & \placeholder{CVE / CWE / OWASP / ADVISORY / RULE ID} \\
+    \bottomrule
+\end{tabularx}
+
+\subsection{Description}
+\placeholder{DESCRIBE THE ISSUE, ITS ROOT CAUSE, AND THE CONDITIONS UNDER
+WHICH IT WAS IDENTIFIED. DISTINGUISH TOOL OUTPUT FROM MANUAL VALIDATION.}
+
+\subsection{Evidence}
+\placeholder{INSERT REDACTED EVIDENCE, REPRODUCTION STEPS, SCREENSHOTS,
+RELEVANT LOG EXCERPTS OR SCANNER OUTPUT. DO NOT INCLUDE LIVE SECRETS,
+PASSWORDS, TOKENS OR OTHER SENSITIVE VALUES.}
+
+% Example evidence image:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{evidence/f-001.png}
+%   \caption{Evidence for finding F-001}
+% \end{figure}
+
+% Example evidence excerpt:
+% \begin{lstlisting}
+% [Insert sanitized tool output or command result]
+% \end{lstlisting}
+
+\subsection{Impact}
+\placeholder{EXPLAIN THE TECHNICAL IMPACT AND, WHERE RELEVANT, THE
+POTENTIAL OPERATIONAL OR BUSINESS CONSEQUENCES.}
+
+\subsection{Likelihood and Exploitability}
+\placeholder{DESCRIBE REQUIRED ACCESS, ATTACK COMPLEXITY, USER INTERACTION,
+EXPOSURE AND OTHER RELEVANT CONDITIONS.}
+
+\subsection{Remediation}
+\begin{enumerate}
+    \item \placeholder{IMMEDIATE CONTAINMENT OR MITIGATION}
+    \item \placeholder{ROOT-CAUSE FIX}
+    \item \placeholder{PREVENTIVE CONTROL OR PIPELINE IMPROVEMENT}
+    \item \placeholder{RETEST / VERIFICATION PROCEDURE}
+\end{enumerate}
+
+\subsection{Retest Result}
+\placeholder{NOT RETESTED / FIX VERIFIED / ISSUE STILL PRESENT / PARTIALLY FIXED.
+INCLUDE RETEST DATE, COMMIT OR PIPELINE REFERENCE WHEN AVAILABLE.}
+
+% ---------------------------------------------------------------------------
+% Copy the complete F-001 section above for F-002, F-003, etc.
+% A future Python/Jinja2 generator can render one section per normalized
+% finding object and populate the summary table and severity totals.
+% ---------------------------------------------------------------------------
+
+% ---------------------------------------------------------------------------
+% 6. Risk Rating Method
+% ---------------------------------------------------------------------------
+\chapter{Risk Rating Method}
+
+\section{Severity Classification}
+If CVSS is used, state the CVSS version and scoring assumptions. The following
+CVSS 3.1 bands are provided as a reference.
+
+\begin{table}[H]
+\centering
+\caption{CVSS 3.1 severity bands}
+\begin{tabularx}{0.85\textwidth}{@{}Y c@{}}
+    \toprule
+    \textbf{Severity} & \textbf{CVSS score} \\
+    \midrule
+    Critical & 9.0 -- 10.0 \\
+    High & 7.0 -- 8.9 \\
+    Medium & 4.0 -- 6.9 \\
+    Low & 0.1 -- 3.9 \\
+    Informational & 0.0 / Not scored \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+CVSS is a technical severity measure and should not be treated as a complete
+business-risk assessment. Consider exposure, exploitability, asset criticality,
+existing controls and the assessment context when assigning the overall risk.
+
+\section{Risk Acceptance}
+\placeholder{DOCUMENT THE RISK ACCEPTANCE PROCESS, APPROVAL AUTHORITY,
+EXPIRATION DATE AND REQUIRED COMPENSATING CONTROLS, IF APPLICABLE.}
+
+% ---------------------------------------------------------------------------
+% 7. Remediation Recommendations
+% ---------------------------------------------------------------------------
+\chapter{Remediation Recommendations}
+
+\section{Prioritized Remediation Plan}
+\begin{longtable}{@{}p{22mm}p{65mm}p{28mm}p{35mm}@{}}
+    \caption{Remediation plan}\\
+    \toprule
+    \textbf{Priority} & \textbf{Action} & \textbf{Owner} & \textbf{Target date} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Priority} & \textbf{Action} & \textbf{Owner} & \textbf{Target date} \\
+    \midrule
+    \endhead
+    Immediate & \placeholder{ACTION} & \placeholder{OWNER} & \placeholder{DATE} \\
+    Short term & \placeholder{ACTION} & \placeholder{OWNER} & \placeholder{DATE} \\
+    Medium term & \placeholder{ACTION} & \placeholder{OWNER} & \placeholder{DATE} \\
+    Long term & \placeholder{ACTION} & \placeholder{OWNER} & \placeholder{DATE} \\
+    \bottomrule
+\end{longtable}
+
+\section{Recommended CI/CD Improvements}
+Potential improvement areas, where supported by the assessment results:
+\begin{itemize}
+    \item Define failure thresholds for high-confidence, validated security findings.
+    \item Protect and restrict access to CI/CD variables and signing credentials.
+    \item Preserve scan reports and SBOM artifacts with appropriate access controls.
+    \item Pin critical build dependencies and container images to immutable digests.
+    \item Verify image signatures before deployment, using an explicit trust policy.
+    \item Define exception handling, expiry dates and approval for accepted risks.
+    \item Re-run relevant security checks after remediation.
+\end{itemize}
+
+\section{Retesting}
+\placeholder{DESCRIBE THE RETEST SCOPE, RESPONSIBLE PARTY, EXPECTED EVIDENCE
+AND HOW REMEDIATION WILL BE CONFIRMED.}
+
+% ---------------------------------------------------------------------------
+% 8. Conclusion
+% ---------------------------------------------------------------------------
+\chapter{Conclusion}
+
+\placeholder{SUMMARIZE THE ASSESSMENT OUTCOME, MOST IMPORTANT RISKS,
+THE EFFECTIVENESS OF THE TESTED CONTROLS AND THE PRIORITY NEXT STEPS.
+ENSURE THAT THE CONCLUSION IS CONSISTENT WITH THE EVIDENCE AND FINDINGS
+DOCUMENTED IN THIS REPORT.}
+
+% ---------------------------------------------------------------------------
+% Appendices
+% ---------------------------------------------------------------------------
+\appendix
+
+\chapter{Pipeline Execution Evidence}
+\placeholder{INCLUDE RELEVANT PIPELINE JOB LOG EXCERPTS, JOB STATUS,
+ARTIFACT REFERENCES AND EXECUTION METADATA. REDACT SECRETS AND SENSITIVE DATA.}
+
+\chapter{Scanner Reports and SBOM}
+\placeholder{REFERENCE THE ORIGINAL JSON / SARIF / CYCLONEDX / SPDX
+ARTIFACTS. INCLUDE SELECTED, SANITIZED EXTRACTS ONLY WHEN THEY HELP
+EXPLAIN A FINDING.}
+
+\chapter{Screenshots and Supporting Evidence}
+% Add evidence images as needed:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=\textwidth]{evidence/example.png}
+%   \caption{Description of evidence}
+% \end{figure}
+\placeholder{ADD SCREENSHOTS, DIAGRAMS OR OTHER SUPPORTING MATERIAL.
+USE STABLE FILENAMES AND REFERENCE THEM FROM THE RELEVANT FINDINGS.}
+
+\chapter{Glossary}
+\begin{longtable}{@{}p{35mm}p{115mm}@{}}
+    \toprule
+    \textbf{Term} & \textbf{Definition} \\
+    \midrule
+    API & Application Programming Interface \\
+    CI/CD & Continuous Integration / Continuous Delivery or Deployment \\
+    CVSS & Common Vulnerability Scoring System \\
+    SAST & Static Application Security Testing \\
+    SBOM & Software Bill of Materials \\
+    \placeholder{TERM} & \placeholder{DEFINITION} \\
+    \bottomrule
+\end{longtable}
+
+\chapter{Assumptions and Limitations}
+\placeholder{RECORD RELEVANT ASSUMPTIONS, TESTING LIMITATIONS, ENVIRONMENTAL
+CONSTRAINTS, UNTESTED COMPONENTS AND ANY OTHER QUALIFICATIONS THAT AFFECT
+INTERPRETATION OF THE RESULTS.}
+
+\end{document}
